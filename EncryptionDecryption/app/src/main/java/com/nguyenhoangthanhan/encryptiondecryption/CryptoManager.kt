@@ -16,18 +16,18 @@ class CryptoManager {
         load(null)
     }
 
-    private val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
-        init(Cipher.ENCRYPT_MODE, createKey())
+    private val encryptCipher get() = Cipher.getInstance(TRANSFORMATION).apply {
+        init(Cipher.ENCRYPT_MODE, getKey())
     }
 
-    private fun getDecryptCipherForIv(iv: ByteArray): Cipher{
+    private fun getDecryptCipherForIv(iv: ByteArray): Cipher {
         return Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.DECRYPT_MODE, getKey(), IvParameterSpec(iv))
         }
     }
 
     private fun getKey(): SecretKey {
-        val existingKey = keyStore.getEntry("secret", null) as? SecretKeyEntry
+        val existingKey = keyStore.getEntry("secret", null) as? KeyStore.SecretKeyEntry
         return existingKey?.secretKey ?: createKey()
     }
 
@@ -47,7 +47,7 @@ class CryptoManager {
         }.generateKey()
     }
 
-    fun encrypt(bytes: ByteArray, outputStream: OutputStream): ByteArray{
+    fun encrypt(bytes: ByteArray, outputStream: OutputStream): ByteArray {
         val encryptedBytes = encryptCipher.doFinal(bytes)
         outputStream.use {
             it.write(encryptCipher.iv.size)
@@ -58,14 +58,14 @@ class CryptoManager {
         return encryptedBytes
     }
 
-    fun decrypt(inputStream: InputStream): ByteArray{
+    fun decrypt(inputStream: InputStream): ByteArray {
         return inputStream.use {
             val ivSize = it.read()
             val iv = ByteArray(ivSize)
             it.read(iv)
 
-            val encryptedByteSize = it.read()
-            val encryptedBytes = ByteArray(encryptedByteSize)
+            val encryptedBytesSize = it.read()
+            val encryptedBytes = ByteArray(encryptedBytesSize)
             it.read(encryptedBytes)
 
             getDecryptCipherForIv(iv).doFinal(encryptedBytes)
@@ -78,4 +78,5 @@ class CryptoManager {
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
     }
+
 }

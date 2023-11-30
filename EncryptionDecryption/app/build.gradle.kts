@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id ("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -65,4 +66,6 @@ dependencies {
     implementation(libs.ui.test.junit4)
     implementation(libs.ui.tooling)
     implementation(libs.ui.test.manifest)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.datastore.preferences)
 }
